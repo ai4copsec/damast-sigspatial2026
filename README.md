@@ -40,7 +40,7 @@ Check the data file:
 Run the pregenerated pipeline (example-pipeline.damast.ppl):
 
 ```
-$> damast process --pipeline examples/prepare.damast.ppl --input-data ./data/AIS_2026_*.parquet --output-file ./results/AIS_2026.prepare.parquet 
+$> damast process --pipeline examples/prepare.damast.ppl --input-data ./data/AIS_2026_*.parquet --output-file ./results/AIS_2026.prepare.parquet
 ```
 
 Check the augmented generated dataframe in ./results

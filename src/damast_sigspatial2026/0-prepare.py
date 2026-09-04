@@ -21,11 +21,7 @@ from pathlib import Path
 
 try:
     # The package has to be installed, otherwise these need to be available as local plugin
-    from damast.plugins import (
-        ExtractGroupStatistics,
-        Healpix,
-        ParseTimestamp
-    )
+    from damast.plugins import ExtractGroupStatistics, Healpix, ParseTimestamp
 except ImportError:
     # The package has not been installed, so enabling as local plugin
     PLUGIN_DIR = Path(__file__).parent / "transformers"
