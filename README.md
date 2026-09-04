@@ -137,6 +137,18 @@ Saved /workspace/damast-sigspatial2026/results/AIS_2026_06_01.prepared.parquet
 (venv-damast) ➜  damast-sigspatial2026
 ```
 
+### Model training
+
+To illustrate a model training for a ForecastTask:
+```
+KERAS_BACKEND=torch python src/damast_sigspatial2026/1-ml-model-creation.py --input-data ./data/AIS_2026_06_01.parquet --pipeline ./examples/prepare.damast.ppl
+```
+
+After training the artifacts and trained models are available in subfolders of:
+```
+/tmp/test-output-ais_preparation
+```
+
 ## License
 This project is licensed under the [BSD-3-Clause License](https://github.com/simula/damast/blob/main/LICENSE).
 Data (.parquet) published here has been retrieved from [barentswatch](https://www.barentswatch.no/) and is licensed under [Norwegian License for Open Government Data (NLOD) 1.0](https://data.norge.no/nlod/en/1.0).

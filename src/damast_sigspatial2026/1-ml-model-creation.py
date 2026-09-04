@@ -27,20 +27,8 @@ from damast.ml.experiments import (
 # To allow the machine learning process to be simplified, we offer a 'BaseModel' that should be inherited from
 from damast.ml.models.base import BaseModel
 
+
 # For performance reasons the underlying data handling library is 'polars'
-
-
-# You can define custom units to annotate data, but otherwise astropy units will be used
-# Data ranges can be defined as list, or marked with a lower-bound (min), upper-bound (max)
-# The AnnotatedDataFrame combines a data specification and actual 'numeric' data
-# An AnnotatedDataFrame contains MetaData to describe the data
-
-
-
-
-
-# Allow to generate data for this particular example that uses data from the maritime domain
-
 class Baseline(BaseModel):
     """
     This is a placeholder ML model that illustrates the minimal
