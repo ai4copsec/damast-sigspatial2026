@@ -1,0 +1,197 @@
+base_dir: .
+description: ''
+meta:
+  damast_version: 0.3.4
+name: prepare
+processing_graph:
+  edges:
+  - from: bd6a6850-9513-4ed5-ac01-a2b1f4107ddf
+    slot: df
+    to: 92a980c5-0571-4832-bb79-a9fc07cd3362
+  - from: 92a980c5-0571-4832-bb79-a9fc07cd3362
+    slot: df
+    to: 4b344174-f9bc-4069-945c-59ad820eb7fe
+  - from: 4b344174-f9bc-4069-945c-59ad820eb7fe
+    slot: df
+    to: cec14d5c-d6c7-4090-bb1f-7e20dd659c43
+  - from: cec14d5c-d6c7-4090-bb1f-7e20dd659c43
+    slot: df
+    to: 900ef590-00fa-4f77-b7ad-ec0b58e23974
+  - from: 900ef590-00fa-4f77-b7ad-ec0b58e23974
+    slot: df
+    to: 68a701f6-5758-4645-834e-cc42b4213781
+  - from: 68a701f6-5758-4645-834e-cc42b4213781
+    slot: df
+    to: 9c601f2e-86a5-4ca9-b8e8-031d7dc7e55f
+  - from: 9c601f2e-86a5-4ca9-b8e8-031d7dc7e55f
+    slot: df
+    to: 7ae392d1-a25a-4e7b-8e59-27c7edfcd011
+  - from: 7ae392d1-a25a-4e7b-8e59-27c7edfcd011
+    slot: df
+    to: e4d77b98-d3f4-4953-901e-6a750e7aba58
+  - from: e4d77b98-d3f4-4953-901e-6a750e7aba58
+    slot: df
+    to: 74ec510e-8ff4-4dc1-8c15-414bfe8de342
+  - from: 74ec510e-8ff4-4dc1-8c15-414bfe8de342
+    slot: df
+    to: d0d78407-a150-439c-8104-4759e0ef45ab
+  - from: d0d78407-a150-439c-8104-4759e0ef45ab
+    slot: df
+    to: 19ded1c9-fcab-4412-9c8b-828f9be76e59
+  nodes:
+  - name: df
+    transformer:
+      class_name: DataSource
+      module_name: damast.core.processing_graph
+      name_mappings:
+        df: {}
+      parameters: {}
+      requires:
+        distribution: damast
+        version: 0.3.4
+    uuid: bd6a6850-9513-4ed5-ac01-a2b1f4107ddf
+  - name: parse_timestamp
+    transformer:
+      class_name: ParseTimestamp
+      module_name: damast_sigspatial2026.transformers.parse_timestamp
+      name_mappings:
+        df:
+          from: msgtime
+          to: timestamp
+      parameters:
+        timeformat: '%Y-%m-%dT%H:%M:%S%:z'
+      requires:
+        distribution: damast-sigspatial2026
+        version: 0.1.0
+    uuid: 92a980c5-0571-4832-bb79-a9fc07cd3362
+  - name: filter_ship_types
+    transformer:
+      class_name: FilterWithin
+      module_name: damast.data_handling.transformers.filters
+      name_mappings:
+        df:
+          x: shipType
+      parameters:
+        within_values:
+        - 30
+        - 60
+        - 70
+        - 80
+      requires:
+        distribution: damast
+        version: 0.3.4
+    uuid: 4b344174-f9bc-4069-945c-59ad820eb7fe
+  - name: delta_time
+    transformer:
+      class_name: AddDeltaTime
+      module_name: damast.data_handling.transformers.augmenters
+      name_mappings:
+        df:
+          group: mmsi
+          time_column: timestamp
+      parameters: {}
+      requires:
+        distribution: damast
+        version: 0.3.4
+    uuid: cec14d5c-d6c7-4090-bb1f-7e20dd659c43
+  - name: delta_distance
+    transformer:
+      class_name: DeltaDistance
+      module_name: damast.domains.maritime.transformers.features
+      name_mappings:
+        df:
+          group: mmsi
+          out: delta_distance
+          sort: timestamp
+          x: latitude
+          y: longitude
+      parameters:
+        x_shift: true
+        y_shift: true
+      requires: &id001
+        distribution: damast
+        version: 0.3.4
+    uuid: 900ef590-00fa-4f77-b7ad-ec0b58e23974
+  - name: speed
+    transformer:
+      class_name: Speed
+      module_name: damast.domains.maritime.transformers.features
+      name_mappings:
+        df:
+          delta_distance: delta_distance
+          delta_time: delta_time
+      parameters: {}
+      requires: *id001
+    uuid: 68a701f6-5758-4645-834e-cc42b4213781
+  - name: heading
+    transformer:
+      class_name: Heading
+      module_name: damast.domains.maritime.transformers.features
+      name_mappings:
+        df:
+          group: mmsi
+          heading: heading
+          lat: latitude
+          lon: longitude
+          sort: timestamp
+      parameters: {}
+      requires: *id001
+    uuid: 9c601f2e-86a5-4ca9-b8e8-031d7dc7e55f
+  - name: angular_velocity
+    transformer:
+      class_name: AngularVelocity
+      module_name: damast.domains.maritime.transformers.features
+      name_mappings:
+        df:
+          group: mmsi
+          heading: heading
+          time: timestamp
+      parameters: {}
+      requires: *id001
+    uuid: 7ae392d1-a25a-4e7b-8e59-27c7edfcd011
+  - name: cycle_timestamp
+    transformer:
+      class_name: TimestampCycleTransformer
+      module_name: damast.data_handling.transformers.cycle_transformer
+      name_mappings:
+        df:
+          x: timestamp
+      parameters: {}
+      requires: &id002
+        distribution: damast
+        version: 0.3.4
+    uuid: e4d77b98-d3f4-4953-901e-6a750e7aba58
+  - name: lat_cycle_transform
+    transformer:
+      class_name: CycleTransformer
+      module_name: damast.data_handling.transformers.cycle_transformer
+      name_mappings:
+        df:
+          x: latitude
+      parameters:
+        n: 180
+      requires: *id002
+    uuid: 74ec510e-8ff4-4dc1-8c15-414bfe8de342
+  - name: lon_cycle_transform
+    transformer:
+      class_name: CycleTransformer
+      module_name: damast.data_handling.transformers.cycle_transformer
+      name_mappings:
+        df:
+          x: longitude
+      parameters:
+        n: 360
+      requires: *id002
+    uuid: d0d78407-a150-439c-8104-4759e0ef45ab
+  - name: healpix
+    transformer:
+      class_name: Healpix
+      module_name: damast_sigspatial2026.transformers.healpix_binning
+      name_mappings:
+        df: {}
+      parameters:
+        nside: 128
+      requires:
+        distribution: damast-sigspatial2026
+        version: 0.1.0
+    uuid: 19ded1c9-fcab-4412-9c8b-828f9be76e59
