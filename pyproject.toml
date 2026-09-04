@@ -13,7 +13,7 @@ authors = [
     { name = "Thomas Roehr", email = "roehr@simula.no" },
 ]
 dependencies = [
-    "damast",
+    "damast[ml]",
     "pyyaml",
     "healpix",
     "plotly"
