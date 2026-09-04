@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools>=61.0.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "damast-sigspatial2026"
+version = "0.1.0"
+description = "A reproduction package for ACM Sigspatial 2026"
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.10"
+authors = [
+    { name = "Thomas Roehr", email = "roehr@simula.no" },
+]
+dependencies = [
+    "damast",
+    "pyyaml",
+    "healpix",
+    "plotly"
+]
+
+[project.optional-dependencies]
+dev = [
+    "pre-commit"
+]
+test = ["pytest"]
+
+# This is what makes transformers in this plugin discoverable for damast.
+# After installation, listable with `damast plugins`
+[project.entry-points."damast.transformers"]
+Healpix = "damast_sigspatial2026.transformers.healpix_binning:Healpix"
+ParseTimestamp = "damast_sigspatial2026.transformers.parse_timestamp:ParseTimestamp"
+
+[tool.setuptools.packages.find]
+where = ["src"]
