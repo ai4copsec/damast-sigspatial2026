@@ -1,0 +1,167 @@
+base_dir: results/joined
+description: ''
+meta:
+  damast_version: 0.3.8
+name: ais_join_sources
+processing_graph:
+  edges:
+  - from: d8974dce-9d53-4376-9f98-080eb4f9271b
+    slot: df
+    to: 03d0156c-5274-40b1-b66c-f85c733dc7cf
+  - from: 03d0156c-5274-40b1-b66c-f85c733dc7cf
+    slot: df
+    to: 0e787e37-616b-4871-9493-eeb9802f891c
+  - from: e5e8a322-b9d7-4fd9-b368-e9eda3261458
+    slot: df
+    to: 6ff1387d-0fdd-4fce-a413-3ba4dba204eb
+  - from: 6ff1387d-0fdd-4fce-a413-3ba4dba204eb
+    slot: other
+    to: 0e787e37-616b-4871-9493-eeb9802f891c
+  - from: 0e787e37-616b-4871-9493-eeb9802f891c
+    slot: df
+    to: b06da04b-e4b7-4743-9a71-25adc159aed3
+  - from: 71b69d7a-af95-4075-8b66-1200bc9e6df7
+    slot: df
+    to: eeb94af2-bae1-4efc-b5ef-56db72c3d836
+  - from: eeb94af2-bae1-4efc-b5ef-56db72c3d836
+    slot: other
+    to: b06da04b-e4b7-4743-9a71-25adc159aed3
+  nodes:
+  - name: df
+    transformer:
+      class_name: DataSource
+      module_name: damast.core.processing_graph
+      name_mappings:
+        df: {}
+      parameters: {}
+      requires: &id001
+        distribution: damast
+        version: 0.3.7
+    uuid: d8974dce-9d53-4376-9f98-080eb4f9271b
+  - name: align_aisdk
+    transformer:
+      class_name: AlignAISSchema
+      module_name: damast_sigspatial2026.transformers.align_ais_schema
+      name_mappings:
+        df:
+          src_call_sign: Callsign
+          src_cog: COG
+          src_draught: Draught
+          src_heading: Heading
+          src_imo: IMO
+          src_latitude: Latitude
+          src_length: Length
+          src_longitude: Longitude
+          src_mmsi: MMSI
+          src_name: Name
+          src_nav_status: Navigational status
+          src_report_class: Type of mobile
+          src_ship_type: Ship type
+          src_sog: SOG
+          src_timestamp: '# Timestamp'
+          src_width: Width
+      parameters:
+        scale: {}
+        source: aisdk
+        timestamp_format: '%d/%m/%Y %H:%M:%S'
+      requires: &id002
+        distribution: damast-sigspatial2026
+        version: 0.1.1
+    uuid: 03d0156c-5274-40b1-b66c-f85c733dc7cf
+  - name: marine-cadastre
+    transformer:
+      class_name: DataSource
+      module_name: damast.core.processing_graph
+      name_mappings:
+        df: {}
+      parameters: {}
+      requires: *id001
+    uuid: e5e8a322-b9d7-4fd9-b368-e9eda3261458
+  - name: align_marine-cadastre
+    transformer:
+      class_name: AlignAISSchema
+      module_name: damast_sigspatial2026.transformers.align_ais_schema
+      name_mappings:
+        df:
+          src_call_sign: call_sign
+          src_cog: cog
+          src_draught: draft
+          src_heading: heading
+          src_imo: imo
+          src_latitude: latitude
+          src_length: length
+          src_longitude: longitude
+          src_mmsi: mmsi
+          src_name: vessel_name
+          src_nav_status: status
+          src_report_class: transceiver
+          src_ship_type: vessel_type
+          src_sog: sog
+          src_timestamp: base_date_time
+          src_width: width
+      parameters:
+        scale: {}
+        source: marine-cadastre
+        timestamp_format: '%Y-%m-%d %H:%M:%S'
+      requires: *id002
+    uuid: 6ff1387d-0fdd-4fce-a413-3ba4dba204eb
+  - name: marine-cadastre
+    transformer:
+      class_name: ConcatDataFrames
+      module_name: damast_sigspatial2026.transformers.concat_dataframes
+      name_mappings:
+        df: {}
+        other: {}
+      parameters: {}
+      requires: &id003
+        distribution: damast-sigspatial2026
+        version: 0.1.1
+    uuid: 0e787e37-616b-4871-9493-eeb9802f891c
+  - name: barentswatch
+    transformer:
+      class_name: DataSource
+      module_name: damast.core.processing_graph
+      name_mappings:
+        df: {}
+      parameters: {}
+      requires: *id001
+    uuid: 71b69d7a-af95-4075-8b66-1200bc9e6df7
+  - name: align_barentswatch
+    transformer:
+      class_name: AlignAISSchema
+      module_name: damast_sigspatial2026.transformers.align_ais_schema
+      name_mappings:
+        df:
+          src_call_sign: callSign
+          src_cog: courseOverGround
+          src_draught: draught
+          src_heading: trueHeading
+          src_imo: imoNumber
+          src_latitude: latitude
+          src_length: shipLength
+          src_longitude: longitude
+          src_mmsi: mmsi
+          src_name: name
+          src_nav_status: navigationalStatus
+          src_report_class: reportClass
+          src_ship_type: shipType
+          src_sog: speedOverGround
+          src_timestamp: msgtime
+          src_width: shipWidth
+      parameters:
+        scale:
+          draught: 0.1
+        source: barentswatch
+        timestamp_format: '%Y-%m-%dT%H:%M:%S%.f%:z'
+      requires: *id002
+    uuid: eeb94af2-bae1-4efc-b5ef-56db72c3d836
+  - name: barentswatch
+    transformer:
+      class_name: ConcatDataFrames
+      module_name: damast_sigspatial2026.transformers.concat_dataframes
+      name_mappings:
+        df: {}
+        other: {}
+      parameters: {}
+      requires: *id003
+    uuid: b06da04b-e4b7-4743-9a71-25adc159aed3

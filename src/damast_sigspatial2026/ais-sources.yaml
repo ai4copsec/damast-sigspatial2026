@@ -1,0 +1,69 @@
+# Source definitions for 0-join-sources.py: how each AIS source maps onto the canonical schema
+# (see CANONICAL_AIS_SCHEMA in transformers/align_ais_schema.py).
+#
+# columns:          canonical column -> source column (must cover the canonical schema exactly)
+# timestamp_format: strptime-like format of the (string) timestamp column
+# scale:            optional factor per canonical column, applied after casting
+
+aisdk:
+  timestamp_format: "%d/%m/%Y %H:%M:%S"
+  columns:
+    mmsi: MMSI
+    timestamp: '# Timestamp'
+    latitude: Latitude
+    longitude: Longitude
+    sog: SOG
+    cog: COG
+    heading: Heading
+    nav_status: Navigational status
+    ship_type: Ship type
+    imo: IMO
+    call_sign: Callsign
+    name: Name
+    length: Length
+    width: Width
+    draught: Draught
+    report_class: Type of mobile
+
+barentswatch:
+  timestamp_format: "%Y-%m-%dT%H:%M:%S%.f%:z"
+  scale:
+    draught: 0.1  # given in 1/10 m
+  columns:
+    mmsi: mmsi
+    timestamp: msgtime
+    latitude: latitude
+    longitude: longitude
+    sog: speedOverGround
+    cog: courseOverGround
+    heading: trueHeading
+    nav_status: navigationalStatus
+    ship_type: shipType
+    imo: imoNumber
+    call_sign: callSign
+    name: name
+    length: shipLength
+    width: shipWidth
+    draught: draught
+    report_class: reportClass
+
+marine-cadastre:
+  timestamp_format: "%Y-%m-%d %H:%M:%S"
+  columns:
+    mmsi: mmsi
+    timestamp: base_date_time
+    latitude: latitude
+    longitude: longitude
+    sog: sog
+    cog: cog
+    heading: heading
+    nav_status: status
+    ship_type: vessel_type
+    imo: imo
+    call_sign: call_sign
+    name: vessel_name
+    length: length
+    width: width
+    draught: draft
+    report_class: transceiver
+

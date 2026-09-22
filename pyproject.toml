@@ -4,11 +4,11 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "damast-sigspatial2026"
-version = "0.1.0"
-description = "A reproduction package for ACM Sigspatial 2026"
+version = "0.1.1"
+description = "A reproduction package for ACM SIGSPATIAL 2026"
 readme = "README.md"
 license = { file = "LICENSE" }
-requires-python = ">=3.10"
+requires-python = ">=3.12"
 authors = [
     { name = "Thomas Roehr", email = "roehr@simula.no" },
 ]
@@ -19,9 +19,10 @@ dependencies = [
     "plotly"
 ]
 
-[project.optional-dependencies]
+[dependency-groups]
 dev = [
-    "pre-commit"
+    "pre-commit",
+    {include-group = "test"}
 ]
 test = [
     "pytest"
@@ -30,9 +31,7 @@ test = [
 # This is what makes transformers in this plugin discoverable for damast.
 # After installation, listable with `damast plugins`
 [project.entry-points."damast.transformers"]
-Healpix = "damast_sigspatial2026.transformers.healpix_binning:Healpix"
-ParseTimestamp = "damast_sigspatial2026.transformers.parse_timestamp:ParseTimestamp"
-ExtractGroupStatistics = "damast_sigspatial2026.transformers.group_statistics:ExtractGroupStatistics"
+damast_sigspatial2026 = "damast_sigspatial2026.transformers"
 
 [tool.setuptools.packages.find]
 where = ["src"]

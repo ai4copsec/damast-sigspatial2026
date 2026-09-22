@@ -4,7 +4,12 @@ Build, run and save the 'ais_prepare' damast pipeline.
 
 This is the plugin-based conversion of ais-analysis/ais-prepare.py: it derives per-ping
 kinematic features (delta_time/delta_distance/speed/heading/angular_velocity), cyclic time/
-lat/lon encodings, and a HEALPix bin id, from raw AIS pings.
+lat/lon encodings, and a HEALPix bin id, from AIS pings.
+
+The input is the joined dataset produced by 0-join-sources.py, i.e. the canonical AIS schema
+of transformers/align_ais_schema.py (mmsi, timestamp, latitude, longitude, ship_type, ...) -
+not the raw, source-specific columns. The timestamp is already a UTC datetime there, so this
+pipeline only drops pings without one instead of parsing it.
 
 The only custom transformer needed here (Healpix) is not part of the damast package - it is
 loaded as a local plugin via the DAMAST_PLUGIN_PATH mechanism (damast.core.transformations.
@@ -15,17 +20,18 @@ DAMAST_PLUGIN_PATH points at that same 'transformers/' folder - see README.md fo
 commands.
 """
 import logging
-import os
 from argparse import ArgumentParser
 from pathlib import Path
 
-try:
-    # The package has to be installed, otherwise these need to be available as local plugin
-    from damast.plugins import ExtractGroupStatistics, Healpix, ParseTimestamp
-except ImportError:
-    # The package has not been installed, so enabling as local plugin
-    PLUGIN_DIR = Path(__file__).parent / "transformers"
-    os.environ.setdefault("DAMAST_PLUGIN_PATH", str(PLUGIN_DIR))
+from damast.core.transformations import plugin_manager
+
+# Plugins are exposed under their top-level package. If this package is not installed, register
+# the local 'transformers/' folder under the same name, so the imports below work either way.
+PLUGIN_PACKAGE = "damast_sigspatial2026"
+if PLUGIN_PACKAGE not in plugin_manager.plugin_packages():
+    plugin_manager.register_plugin_package(PLUGIN_PACKAGE, Path(__file__).parent / "transformers")
+
+from damast.plugins.damast_sigspatial2026 import ExtractGroupStatistics, Healpix
 
 from damast.core.dataframe import AnnotatedDataFrame
 from damast.core.dataprocessing import DataProcessingPipeline
@@ -35,7 +41,7 @@ from damast.data_handling.transformers.cycle_transformer import (
     CycleTransformer,
     TimestampCycleTransformer,
 )
-from damast.data_handling.transformers.filters import FilterWithin
+from damast.data_handling.transformers.filters import DropMissingOrNan, FilterWithin
 from damast.domains.maritime.transformers import (
     AngularVelocity,
     DeltaDistance,
@@ -60,7 +66,7 @@ if __name__ == "__main__":
     subparsers = parser.add_subparsers(help="sub-command help", dest='command')
     parser_run = subparsers.add_parser('run', help="Run the pipeline")
     parser_run.add_argument("--ais-data", nargs="+", type=str, required=True,
-                        help="AIS input file(s), e.g. a .parquet file")
+                        help="Joined AIS input file(s) from 0-join-sources.py, e.g. a .parquet file")
 
     parser_run = subparsers.add_parser('export', help="Export the pipeline")
     args = parser.parse_args()
@@ -70,10 +76,11 @@ if __name__ == "__main__":
 
     pipeline = (
         DataProcessingPipeline(name=args.pipeline_name, base_dir=base_dir)
-        .add("parse_timestamp", ParseTimestamp(),
-             name_mappings={"from": "msgtime", "to": "timestamp"})
+        # 0-join-sources.py already parsed the timestamp - only its nulls still have to go,
+        # since every step below sorts or groups by it
+        .add("drop_missing_timestamp", DropMissingOrNan(), name_mappings={"x": "timestamp"})
         .add("filter_ship_types", FilterWithin(within_values=args.ship_types),
-             name_mappings={"x": "shipType"})
+             name_mappings={"x": "ship_type"})
         .add("delta_time", AddDeltaTime(),
              name_mappings={"group": "mmsi", "time_column": "timestamp"})
         .add("delta_distance", DeltaDistance(x_shift=True, y_shift=True),

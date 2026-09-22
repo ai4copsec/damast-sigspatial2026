@@ -1,43 +1,46 @@
-base_dir: .
+base_dir: ../../examples
 description: ''
 meta:
-  damast_version: 0.3.4
+  damast_version: 0.3.8
 name: prepare
 processing_graph:
   edges:
-  - from: bd6a6850-9513-4ed5-ac01-a2b1f4107ddf
+  - from: 1ea7614c-fcc0-4c5a-a392-d797de47a78b
     slot: df
-    to: 92a980c5-0571-4832-bb79-a9fc07cd3362
-  - from: 92a980c5-0571-4832-bb79-a9fc07cd3362
+    to: d2187c72-18d5-4b19-8e37-07ef0f66983c
+  - from: d2187c72-18d5-4b19-8e37-07ef0f66983c
     slot: df
-    to: 4b344174-f9bc-4069-945c-59ad820eb7fe
-  - from: 4b344174-f9bc-4069-945c-59ad820eb7fe
+    to: 863415f8-b64a-4da7-baa6-0780d17db140
+  - from: 863415f8-b64a-4da7-baa6-0780d17db140
     slot: df
-    to: cec14d5c-d6c7-4090-bb1f-7e20dd659c43
-  - from: cec14d5c-d6c7-4090-bb1f-7e20dd659c43
+    to: ae276530-e3f0-4574-a2d6-7836f0622d02
+  - from: ae276530-e3f0-4574-a2d6-7836f0622d02
     slot: df
-    to: 900ef590-00fa-4f77-b7ad-ec0b58e23974
-  - from: 900ef590-00fa-4f77-b7ad-ec0b58e23974
+    to: 20a94897-8aa2-4b4c-9aac-337911d3b661
+  - from: 20a94897-8aa2-4b4c-9aac-337911d3b661
     slot: df
-    to: 68a701f6-5758-4645-834e-cc42b4213781
-  - from: 68a701f6-5758-4645-834e-cc42b4213781
+    to: 4a73d1c9-6bc5-4f5c-baa2-351edff003a0
+  - from: 4a73d1c9-6bc5-4f5c-baa2-351edff003a0
     slot: df
-    to: 9c601f2e-86a5-4ca9-b8e8-031d7dc7e55f
-  - from: 9c601f2e-86a5-4ca9-b8e8-031d7dc7e55f
+    to: 08f429a9-533e-4721-b273-e7e1e3849835
+  - from: 08f429a9-533e-4721-b273-e7e1e3849835
     slot: df
-    to: 7ae392d1-a25a-4e7b-8e59-27c7edfcd011
-  - from: 7ae392d1-a25a-4e7b-8e59-27c7edfcd011
+    to: c0ecbf00-2af1-4ede-a477-a668b0d573dd
+  - from: c0ecbf00-2af1-4ede-a477-a668b0d573dd
     slot: df
-    to: e4d77b98-d3f4-4953-901e-6a750e7aba58
-  - from: e4d77b98-d3f4-4953-901e-6a750e7aba58
+    to: 4cbd4809-48c6-4884-a1bd-d8060e2f9f94
+  - from: 4cbd4809-48c6-4884-a1bd-d8060e2f9f94
     slot: df
-    to: 74ec510e-8ff4-4dc1-8c15-414bfe8de342
-  - from: 74ec510e-8ff4-4dc1-8c15-414bfe8de342
+    to: 026d9a97-12d3-4c6b-9fde-14a8d5e22734
+  - from: 026d9a97-12d3-4c6b-9fde-14a8d5e22734
     slot: df
-    to: d0d78407-a150-439c-8104-4759e0ef45ab
-  - from: d0d78407-a150-439c-8104-4759e0ef45ab
+    to: 8f9de136-5589-4db5-85bb-083691177a9f
+  - from: 8f9de136-5589-4db5-85bb-083691177a9f
     slot: df
-    to: 19ded1c9-fcab-4412-9c8b-828f9be76e59
+    to: 40817e99-5cd8-41d0-9d19-53e605ddf66d
+  - from: 40817e99-5cd8-41d0-9d19-53e605ddf66d
+    slot: df
+    to: 5a649da8-7133-4df1-9c5c-482b017c6725
   nodes:
   - name: df
     transformer:
@@ -48,39 +51,35 @@ processing_graph:
       parameters: {}
       requires:
         distribution: damast
-        version: 0.3.4
-    uuid: bd6a6850-9513-4ed5-ac01-a2b1f4107ddf
-  - name: parse_timestamp
+        version: 0.3.8
+    uuid: 1ea7614c-fcc0-4c5a-a392-d797de47a78b
+  - name: drop_missing_timestamp
     transformer:
-      class_name: ParseTimestamp
-      module_name: damast_sigspatial2026.transformers.parse_timestamp
+      class_name: DropMissingOrNan
+      module_name: damast.data_handling.transformers.filters
       name_mappings:
         df:
-          from: msgtime
-          to: timestamp
-      parameters:
-        timeformat: '%Y-%m-%dT%H:%M:%S%:z'
-      requires:
-        distribution: damast-sigspatial2026
-        version: 0.1.0
-    uuid: 92a980c5-0571-4832-bb79-a9fc07cd3362
+          x: timestamp
+      parameters: {}
+      requires: &id001
+        distribution: damast
+        version: 0.3.8
+    uuid: d2187c72-18d5-4b19-8e37-07ef0f66983c
   - name: filter_ship_types
     transformer:
       class_name: FilterWithin
       module_name: damast.data_handling.transformers.filters
       name_mappings:
         df:
-          x: shipType
+          x: ship_type
       parameters:
         within_values:
         - 30
         - 60
         - 70
         - 80
-      requires:
-        distribution: damast
-        version: 0.3.4
-    uuid: 4b344174-f9bc-4069-945c-59ad820eb7fe
+      requires: *id001
+    uuid: 863415f8-b64a-4da7-baa6-0780d17db140
   - name: delta_time
     transformer:
       class_name: AddDeltaTime
@@ -92,8 +91,8 @@ processing_graph:
       parameters: {}
       requires:
         distribution: damast
-        version: 0.3.4
-    uuid: cec14d5c-d6c7-4090-bb1f-7e20dd659c43
+        version: 0.3.8
+    uuid: ae276530-e3f0-4574-a2d6-7836f0622d02
   - name: delta_distance
     transformer:
       class_name: DeltaDistance
@@ -108,10 +107,10 @@ processing_graph:
       parameters:
         x_shift: true
         y_shift: true
-      requires: &id001
+      requires: &id002
         distribution: damast
-        version: 0.3.4
-    uuid: 900ef590-00fa-4f77-b7ad-ec0b58e23974
+        version: 0.3.8
+    uuid: 20a94897-8aa2-4b4c-9aac-337911d3b661
   - name: speed
     transformer:
       class_name: Speed
@@ -121,8 +120,8 @@ processing_graph:
           delta_distance: delta_distance
           delta_time: delta_time
       parameters: {}
-      requires: *id001
-    uuid: 68a701f6-5758-4645-834e-cc42b4213781
+      requires: *id002
+    uuid: 4a73d1c9-6bc5-4f5c-baa2-351edff003a0
   - name: heading
     transformer:
       class_name: Heading
@@ -135,8 +134,8 @@ processing_graph:
           lon: longitude
           sort: timestamp
       parameters: {}
-      requires: *id001
-    uuid: 9c601f2e-86a5-4ca9-b8e8-031d7dc7e55f
+      requires: *id002
+    uuid: 08f429a9-533e-4721-b273-e7e1e3849835
   - name: angular_velocity
     transformer:
       class_name: AngularVelocity
@@ -147,8 +146,8 @@ processing_graph:
           heading: heading
           time: timestamp
       parameters: {}
-      requires: *id001
-    uuid: 7ae392d1-a25a-4e7b-8e59-27c7edfcd011
+      requires: *id002
+    uuid: c0ecbf00-2af1-4ede-a477-a668b0d573dd
   - name: cycle_timestamp
     transformer:
       class_name: TimestampCycleTransformer
@@ -157,10 +156,10 @@ processing_graph:
         df:
           x: timestamp
       parameters: {}
-      requires: &id002
+      requires: &id003
         distribution: damast
-        version: 0.3.4
-    uuid: e4d77b98-d3f4-4953-901e-6a750e7aba58
+        version: 0.3.8
+    uuid: 4cbd4809-48c6-4884-a1bd-d8060e2f9f94
   - name: lat_cycle_transform
     transformer:
       class_name: CycleTransformer
@@ -170,8 +169,8 @@ processing_graph:
           x: latitude
       parameters:
         n: 180
-      requires: *id002
-    uuid: 74ec510e-8ff4-4dc1-8c15-414bfe8de342
+      requires: *id003
+    uuid: 026d9a97-12d3-4c6b-9fde-14a8d5e22734
   - name: lon_cycle_transform
     transformer:
       class_name: CycleTransformer
@@ -181,8 +180,8 @@ processing_graph:
           x: longitude
       parameters:
         n: 360
-      requires: *id002
-    uuid: d0d78407-a150-439c-8104-4759e0ef45ab
+      requires: *id003
+    uuid: 8f9de136-5589-4db5-85bb-083691177a9f
   - name: healpix
     transformer:
       class_name: Healpix
@@ -193,5 +192,18 @@ processing_graph:
         nside: 128
       requires:
         distribution: damast-sigspatial2026
-        version: 0.1.0
-    uuid: 19ded1c9-fcab-4412-9c8b-828f9be76e59
+        version: 0.1.1
+    uuid: 40817e99-5cd8-41d0-9d19-53e605ddf66d
+  - name: group_statistics
+    transformer:
+      class_name: ExtractGroupStatistics
+      module_name: damast_sigspatial2026.transformers.group_statistics
+      name_mappings:
+        df:
+          delta_time: delta_time
+          group: mmsi
+      parameters: {}
+      requires:
+        distribution: damast-sigspatial2026
+        version: 0.1.1
+    uuid: 5a649da8-7133-4df1-9c5c-482b017c6725
