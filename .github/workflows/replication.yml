@@ -1,7 +1,7 @@
 # Replays the steps documented in README.md on a clean runner, using damast from PyPI.
 #
 # 'smoke' runs on every push/PR and only uses data that is in the repository.
-# 'replicate' does the full README - it downloads ~1 GB of AIS data and joins ~30M rows -
+# 'replicate' does the full README - it downloads ~1 GB of AIS data (cut to MAX_CSV_ROWS per source) -
 # and therefore only runs on demand and once a week.
 name: replication
 
@@ -24,6 +24,8 @@ env:
   UV_TORCH_BACKEND: cpu
   AISDK_URL: http://aisdata.ais.dk/aisdk-2026-06-01.zip
   MARINE_CADASTRE_URL: https://noaaocm.blob.core.windows.net/ais/csv2/csv2026/ais-2026-06-01.csv.zst
+  # Runners are resource limited. So setting an upper limit for AIS messages kept from each downloaded CSV before conversion
+  MAX_CSV_ROWS: 100000
 
 jobs:
   # Installation and plugin registration, against the one input file that is in the repository.
@@ -107,7 +109,7 @@ jobs:
           uv pip install .
           uv pip list | grep -E '^damast'
 
-      # ~730 MB together - keeps the ~1 GB download out of every rerun
+      # keeps the ~1 GB download out of every rerun
       - name: Cache converted input data
         id: ais-cache
         uses: actions/cache@v6
@@ -115,19 +117,26 @@ jobs:
           path: |
             data/aisdk-2026-06-01.parquet
             data/ais-2026-06-01.parquet
-          key: ais-inputs-2026-06-01-v1
+          key: ais-inputs-2026-06-01-rows${{ env.MAX_CSV_ROWS }}-v2
 
       - name: Download and convert input data
         if: steps.ais-cache.outputs.cache-hit != 'true'
         run: |
-          # remove each archive right after converting it - the runner has ~14 GB free
+          # keep the header plus MAX_CSV_ROWS rows; '|| true' because head closing the pipe
+          # early makes the decompressor exit with SIGPIPE, which pipefail would turn into a failure
           wget -q -O aisdk-2026-06-01.zip "$AISDK_URL"
-          damast convert -f aisdk-2026-06-01.zip --save-as data/aisdk-2026-06-01.parquet
+          { unzip -p aisdk-2026-06-01.zip || true; } | head -n $((MAX_CSV_ROWS + 1)) > aisdk-2026-06-01.csv
           rm aisdk-2026-06-01.zip
+          test "$(wc -l < aisdk-2026-06-01.csv)" -gt 1
+          damast convert -f aisdk-2026-06-01.csv --save-as data/aisdk-2026-06-01.parquet
+          rm aisdk-2026-06-01.csv
 
           wget -q -O ais-2026-06-01.csv.zst "$MARINE_CADASTRE_URL"
-          damast convert -f ais-2026-06-01.csv.zst --save-as data/ais-2026-06-01.parquet
+          { zstd -dc ais-2026-06-01.csv.zst || true; } | head -n $((MAX_CSV_ROWS + 1)) > ais-2026-06-01.csv
           rm ais-2026-06-01.csv.zst
+          test "$(wc -l < ais-2026-06-01.csv)" -gt 1
+          damast convert -f ais-2026-06-01.csv --save-as data/ais-2026-06-01.parquet
+          rm ais-2026-06-01.csv
 
           df -h .
 
