@@ -36,12 +36,16 @@ class Healpix(PipelineElement):
     def transform(self, df: AnnotatedDataFrame) -> AnnotatedDataFrame:
         latitude = self.get_name("latitude")
         longitude = self.get_name("longitude")
+        # bound locally: a lambda reading self.nside would capture the transformer - and with it
+        # the parent pipeline and its pending queries - which polars then has to pickle whenever
+        # the plan is serialized (e.g. Experiment's save_state), and cannot
+        nside = self.nside
 
         df.lazyframe = df.lazyframe.with_columns(
             healpix_id=pl.struct([latitude, longitude]).map_batches(
                 # https://github.com/healpy/healpy/issues/602
                 lambda s: hp.ang2pix(
-                    nside=self.nside,
+                    nside=nside,
                     theta=s.struct.field(longitude),
                     phi=s.struct.field(latitude),
                     lonlat=True,
